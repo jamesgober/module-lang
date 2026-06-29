@@ -13,8 +13,9 @@
 
 #[cfg(test)]
 mod tests {
+    /// The scaffold carries no public surface yet (see `dev/ROADMAP.md`); this
+    /// test exists so the crate compiles and links under the test harness, and
+    /// so CI has a unit test to run before the resolution code lands.
     #[test]
-    fn smoke() {
-        assert_eq!(1 + 1, 2);
-    }
+    fn crate_builds_under_test_harness() {}
 }

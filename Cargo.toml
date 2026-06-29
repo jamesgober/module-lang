@@ -19,10 +19,10 @@ readme = "README.md"
 description = "Module and import resolution for multi-file languages."
 
 # Keywords (5 max)
-keywords = [compiler,language,modules,imports]
+keywords = ["compiler", "language", "modules", "imports"]
 
 # Categories
-categories = [development-tools,compilers]
+categories = ["development-tools", "compilers"]
 
 # Links
 homepage      = "https://github.com/jamesgober/module-lang"
