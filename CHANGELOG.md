@@ -21,6 +21,38 @@
 
 ---
 
+## [0.2.0] - 2026-06-29
+
+The resolution core. Module and import resolution across multiple source files,
+wiring `symbol-lang` for the interned name key and `source-lang` for the file each
+module was read from. Every invariant is property-tested against a naive reference
+resolver.
+
+### Added
+
+- `ModuleGraph<T>` — the owner of resolution state, generic over the payload a name
+  resolves to. Build it with `new` / `with_capacity`, add modules with
+  `add_module`, declare names with `define` and `import`, look them up with
+  `resolve`, and inspect it with `len`, `is_empty`, `module_name`, and
+  `module_source`.
+- `ModuleId` — a stable, opaque, copyable handle to a module, with `to_u32`.
+- `Visibility` — `Public` / `Private`, gating whether an import from another module
+  can reach a name.
+- `ResolveError` — `UnknownModule`, `DuplicateName`, `Unresolved`, `Private`, and
+  `ImportCycle`, with `Display` and `std::error::Error`; `#[non_exhaustive]`.
+- Re-exports of `Symbol` (from `symbol-lang`) and `SourceId` (from `source-lang`),
+  the handle types the API speaks in.
+- `serde` derives for `ModuleId` and `Visibility` behind the `serde` feature.
+- Property tests cross-checking resolution against a naive reference resolver, and
+  `criterion` benchmarks for the build and resolve paths.
+- `docs/API.md` documenting every public item with examples.
+
+### Changed
+
+- The `std` feature now forwards to `source-lang/std` and `symbol-lang/std`.
+
+---
+
 ## [0.1.0] - 2026-06-18
 
 Initial scaffold and repository bootstrap. No domain logic yet &mdash; this release establishes the structure, tooling, and quality gates the implementation will be built on.
@@ -34,5 +66,6 @@ Initial scaffold and repository bootstrap. No domain logic yet &mdash; this rele
 - `.github/workflows/ci.yml` CI matrix; `deny.toml`, `clippy.toml`, `rustfmt.toml`.
 - `dev/DIRECTIVES.md` and `dev/ROADMAP.md` (committed engineering standards + plan).
 
-[Unreleased]: https://github.com/jamesgober/module-lang/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/jamesgober/module-lang/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/jamesgober/module-lang/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/jamesgober/module-lang/releases/tag/v0.1.0

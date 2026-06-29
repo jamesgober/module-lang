@@ -3,7 +3,7 @@
 # =============================================================================
 [package]
 name    = "module-lang"
-version = "0.1.0"
+version = "0.2.0"
 
 # Minimum Supported Rust Version (MSRV)
 rust-version = "1.85"
@@ -45,20 +45,26 @@ path = "src/lib.rs"
 # #################################
 [features]
 default = ["std"]
-std = []
-# Serialization support.
+std = ["source-lang/std", "symbol-lang/std"]
+# Serialization for the plain handle and metadata types (`ModuleId`, `Visibility`).
 serde = ["dep:serde"]
 
 
 # DEPENDENCIES
 # #################################
 [dependencies]
+# Interned name handles (`Symbol`): the key every module and item is named by.
+symbol-lang = { version = "1", default-features = false }
+# Stable source-file ids (`SourceId`): which file each module was read from.
+source-lang = { version = "1", default-features = false }
 serde = { version = "1", optional = true, default-features = false, features = ["derive", "alloc"] }
 
 
 # DEV DEPENDENCIES
 # #################################
 [dev-dependencies]
+# Interner used by the examples and tests to mint `Symbol`s from names.
+intern-lang = "1"
 criterion = { version = "0.5", features = ["html_reports"] }
 proptest  = "1"
 

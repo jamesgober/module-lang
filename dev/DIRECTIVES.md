@@ -18,7 +18,7 @@ module-lang resolves modules and imports across multiple source files. It takes 
 
 ## 2. Engineering law (non-negotiable)
 
-- **Performance** — peak is the baseline; a name resolves through a module's exports in `O(1)` average, never a linear scan of every item; the graph is built once and queried many times, not re-walked per lookup; no steady-state hot-path allocation in the resolve path; no "faster" claim without `criterion` numbers.
+- **Performance** — peak is the baseline; a name resolves through a module's exports in `O(log items)`, never a linear scan of every item; the graph is built once and queried many times, not re-walked per lookup; no steady-state hot-path allocation on a local-resolution hit; no "faster" claim without `criterion` numbers.
 - **Correctness** — the invariants in section 4 are covered by property tests; a resolved import names exactly the item a hand-traced resolution would, and an import cycle terminates as a reported error, never as unbounded recursion.
 - **Security** — every module and import is treated as untrusted input; a malformed graph, a self-import, or a cycle is a defined error, never UB or a stack overflow; recursion depth and fan-out are bounded.
 - **Architecture** — SOLID, KISS, YAGNI; one responsibility; the dependencies (`symbol-lang`, `source-lang`) sit behind narrow seams and are wired only where first used.

@@ -18,7 +18,7 @@
 
 <div align="left">
     <p>
-        module-lang is the SEMA-tier crate: Module and import resolution across multiple source files. Part of the -lang language-construction family; see _strategy/LANG_COLLECTION.md for the master plan.
+        module-lang resolves modules and imports across multiple source files. Given the modules a front-end has already parsed &mdash; each exporting a set of named items &mdash; it answers the question every <code>use</code>/<code>import</code> asks: which item does this name refer to? It builds the module graph, resolves each import to its target, reports unresolved names and import cycles as defined errors, and honours item visibility. It is a SEMA-tier crate of the <code>-lang</code> language-construction family.
     </p>
     <br>
     <hr>
@@ -26,7 +26,7 @@
         <strong>MSRV is 1.85+</strong> (Rust 2024 edition).
     </p>
     <blockquote>
-        <strong>Status: pre-1.0, in active development.</strong> The public API is being designed across the 0.x series and frozen at <code>1.0.0</code>. See <a href="./CHANGELOG.md"><code>CHANGELOG.md</code></a>.
+        <strong>Status: pre-1.0, in active development.</strong> The resolution core has landed (<code>v0.2.0</code>); the public API is still being designed across the 0.x series and frozen at <code>1.0.0</code>. See <a href="./docs/API.md"><code>docs/API.md</code></a> and <a href="./CHANGELOG.md"><code>CHANGELOG.md</code></a>.
     </blockquote>
 </div>
 
@@ -37,14 +37,134 @@
 
 ```toml
 [dependencies]
-module-lang = "0.1"
+module-lang = "0.2"
 ```
+
+Or from the terminal:
+
+```bash
+cargo add module-lang
+```
+
+<br>
+
+## Usage
+
+Build a graph with one module per source file, define the items each exports, wire
+the imports between them, and resolve a name to the payload it refers to. The
+payload type is yours — a definition id, an AST node, a type — written here as
+`&str` for illustration.
+
+```rust
+use intern_lang::Interner;
+use module_lang::{ModuleGraph, ResolveError, Visibility};
+use source_lang::SourceMap;
+
+// Two files, each a module: `app` uses an item exported by `util`.
+let mut sources = SourceMap::new();
+let app_src = sources.add("app.lang", "use util.helper;")?;
+let util_src = sources.add("util.lang", "pub fn helper() {}")?;
+
+let mut names = Interner::new();
+let helper = names.intern("helper");
+
+let mut graph: ModuleGraph<&str> = ModuleGraph::new();
+let app = graph.add_module(names.intern("app"), app_src);
+let util = graph.add_module(names.intern("util"), util_src);
+
+graph.define(util, helper, Visibility::Public, "fn helper")?;
+graph.import(app, util, helper)?;
+
+// The import resolves through to the definition in `util`.
+assert_eq!(graph.resolve(app, helper), Ok(&"fn helper"));
+
+// A name nobody declared is a defined error, never a panic.
+let missing = names.intern("nope");
+assert!(matches!(graph.resolve(app, missing), Err(ResolveError::Unresolved { .. })));
+# Ok::<(), Box<dyn std::error::Error>>(())
+```
+
+Visibility gates crossing a module boundary, not seeing a module's own names. A
+module reaches its own private items; an import from elsewhere does not:
+
+```rust
+use intern_lang::Interner;
+use module_lang::{ModuleGraph, ResolveError, Visibility};
+use source_lang::SourceMap;
+
+let mut sources = SourceMap::new();
+let mut names = Interner::new();
+let mut graph: ModuleGraph<()> = ModuleGraph::new();
+
+let lib = graph.add_module(names.intern("lib"), sources.add("lib", "")?);
+let app = graph.add_module(names.intern("app"), sources.add("app", "")?);
+let secret = names.intern("secret");
+
+graph.define(lib, secret, Visibility::Private, ())?;
+assert!(graph.resolve(lib, secret).is_ok());           // visible at home
+
+graph.import(app, lib, secret)?;
+assert!(matches!(                                       // not through an import
+    graph.resolve(app, secret),
+    Err(ResolveError::Private { .. }),
+));
+# Ok::<(), Box<dyn std::error::Error>>(())
+```
+
+Imports chain — a module may re-export what it imported — and a chain that loops
+back is reported as a cycle in bounded time rather than recursing without end:
+
+```rust
+use intern_lang::Interner;
+use module_lang::{ModuleGraph, ResolveError, Visibility};
+use source_lang::SourceMap;
+
+let mut sources = SourceMap::new();
+let mut names = Interner::new();
+let mut graph: ModuleGraph<()> = ModuleGraph::new();
+
+let a = graph.add_module(names.intern("a"), sources.add("a", "")?);
+let b = graph.add_module(names.intern("b"), sources.add("b", "")?);
+let x = names.intern("x");
+
+// a imports x from b, b imports x from a: a closed loop with no definition.
+graph.import(a, b, x)?;
+graph.import(b, a, x)?;
+assert!(matches!(graph.resolve(a, x), Err(ResolveError::ImportCycle { .. })));
+# Ok::<(), Box<dyn std::error::Error>>(())
+```
+
+See <a href="./docs/API.md"><code>docs/API.md</code></a> for the full reference.
+
+<br>
+
+## How it works
+
+A `ModuleGraph` holds one module per source file, each carrying the `SourceId` it
+was read from and a flat namespace of names. A name is declared at most once per
+module — a second definition or a colliding import is a defined error. Names live
+in a `BTreeMap` keyed on the interned `Symbol`, so a lookup compares integers in
+`O(log items)` and iteration is deterministic.
+
+Resolution treats a module's own names as fully visible, public or private.
+Crossing a module boundary through an import is where visibility applies: an import
+reaches a name in another module only if it is public. The walk along an import
+chain is iterative and tracks the `(module, name)` pairs it has seen, so a loop is
+reported as a cycle rather than overflowing the stack, and a local hit allocates
+nothing.
 
 <br>
 
 ## Status
 
-This is the <code>v0.1.0</code> scaffold: structure, tooling, and quality gates are in place; the implementation lands across the 0.x series per the <a href="./dev/ROADMAP.md"><code>ROADMAP</code></a> and <a href="./docs/API.md"><code>docs/API.md</code></a>.
+<code>v0.2.0</code> lands the resolution core: <code>ModuleGraph</code> with stable
+<code>ModuleId</code>s, <code>define</code>/<code>import</code>/<code>resolve</code>,
+visibility, and import-cycle detection, wiring <code>symbol-lang</code> for the name
+key and <code>source-lang</code> for the file each module came from. Every invariant
+is property-tested against a naive reference resolver and verified on Linux, macOS,
+and Windows. The public API is not yet frozen — it stabilises at <code>1.0.0</code>;
+until then a minor release may make a breaking change, each documented in the
+<a href="./CHANGELOG.md"><code>CHANGELOG</code></a>.
 
 <hr>
 <br>

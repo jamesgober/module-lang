@@ -9,12 +9,14 @@
 Compiles, CI green, structure correct, no domain logic.
 - [x] Manifest, README, CHANGELOG, REPS, dual license, CI, deny, clippy, rustfmt.
 
-## v0.2.0 - Core (THE HARD PART, NOT DEFERRED)
-Module and import resolution across multiple source files.
-Dependencies (wires symbol, source) are wired here, when first used.
+## v0.2.0 - Core (THE HARD PART, NOT DEFERRED) (DONE)
+Module and import resolution across multiple source files. `ModuleGraph<T>` with
+stable `ModuleId`s; `define`/`import`/`resolve`; visibility and import-cycle
+detection. Dependencies wired where first used: `symbol-lang` for the `Symbol`
+name key, `source-lang` for the `SourceId` each module is read from.
 Exit criteria:
-- [ ] Every public item has rustdoc + a runnable example.
-- [ ] Core invariants property-tested (full DIRECTIVES + API authored at this stage).
+- [x] Every public item has rustdoc + a runnable example.
+- [x] Core invariants property-tested against a naive reference resolver (DIRECTIVES + API authored at this stage).
 
 ## v1.0.0 - API freeze
 Public surface stable and frozen until 2.0.
