@@ -68,15 +68,26 @@
 //!
 //! ## Stability
 //!
-//! The public API is being designed across the 0.x series and freezes at `1.0`.
-//! Until then a minor release may make a breaking change, each documented in the
-//! [`CHANGELOG`](https://github.com/jamesgober/module-lang/blob/main/CHANGELOG.md).
-//! See [`docs/API.md`](https://github.com/jamesgober/module-lang/blob/main/docs/API.md).
+//! The public API is stable as of `1.0` and follows Semantic Versioning: no
+//! breaking changes before `2.0`, additions arrive in minor releases, and the MSRV
+//! (Rust 1.85) only rises in a minor. [`ResolveError`] is `#[non_exhaustive]`, so a
+//! new variant is a minor change. The full promise is in
+//! [`docs/API.md`](https://github.com/jamesgober/module-lang/blob/main/docs/API.md#semver-promise).
 
 #![cfg_attr(not(feature = "std"), no_std)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
-#![deny(missing_docs)]
 #![forbid(unsafe_code)]
+#![deny(missing_docs)]
+#![deny(unused_must_use)]
+#![deny(clippy::unwrap_used)]
+#![deny(clippy::expect_used)]
+#![deny(clippy::panic)]
+#![deny(clippy::todo)]
+#![deny(clippy::unimplemented)]
+#![deny(clippy::unreachable)]
+#![deny(clippy::dbg_macro)]
+#![deny(clippy::print_stdout)]
+#![deny(clippy::print_stderr)]
 
 extern crate alloc;
 

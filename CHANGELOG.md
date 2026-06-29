@@ -21,6 +21,25 @@
 
 ---
 
+## [1.0.0] - 2026-06-29
+
+API freeze. The resolution surface introduced in v0.2.0 is ratified as the `1.0`
+contract: stable and frozen under Semantic Versioning, with no breaking changes
+before `2.0`. A `0.2.0` program compiles and behaves identically against `1.0.0`.
+
+### Changed
+
+- `docs/API.md` is marked stable and records the SemVer promise.
+- Hardened the crate-level lint profile to forbid panics, `unwrap`/`expect`, and
+  debug macros in library code.
+
+### Added
+
+- A `serde` round-trip test for `ModuleId` and `Visibility`.
+- A runnable `multi_file_project` example.
+
+---
+
 ## [0.2.0] - 2026-06-29
 
 The resolution core. Module and import resolution across multiple source files,
@@ -66,6 +85,7 @@ Initial scaffold and repository bootstrap. No domain logic yet &mdash; this rele
 - `.github/workflows/ci.yml` CI matrix; `deny.toml`, `clippy.toml`, `rustfmt.toml`.
 - `dev/DIRECTIVES.md` and `dev/ROADMAP.md` (committed engineering standards + plan).
 
-[Unreleased]: https://github.com/jamesgober/module-lang/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/jamesgober/module-lang/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/jamesgober/module-lang/compare/v0.2.0...v1.0.0
 [0.2.0]: https://github.com/jamesgober/module-lang/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/jamesgober/module-lang/releases/tag/v0.1.0

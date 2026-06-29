@@ -26,7 +26,7 @@
         <strong>MSRV is 1.85+</strong> (Rust 2024 edition).
     </p>
     <blockquote>
-        <strong>Status: pre-1.0, in active development.</strong> The resolution core has landed (<code>v0.2.0</code>); the public API is still being designed across the 0.x series and frozen at <code>1.0.0</code>. See <a href="./docs/API.md"><code>docs/API.md</code></a> and <a href="./CHANGELOG.md"><code>CHANGELOG.md</code></a>.
+        <strong>Status: stable (1.0).</strong> The public API is frozen and follows Semantic Versioning &mdash; no breaking changes before <code>2.0</code>. See <a href="./docs/API.md#semver-promise"><code>the SemVer promise</code></a> and <a href="./CHANGELOG.md"><code>CHANGELOG.md</code></a>.
     </blockquote>
 </div>
 
@@ -37,7 +37,7 @@
 
 ```toml
 [dependencies]
-module-lang = "0.2"
+module-lang = "1.0"
 ```
 
 Or from the terminal:
@@ -157,14 +157,15 @@ nothing.
 
 ## Status
 
-<code>v0.2.0</code> lands the resolution core: <code>ModuleGraph</code> with stable
+<code>v1.0.0</code> is the stable release: the public API is frozen and follows
+Semantic Versioning, with no breaking changes before <code>2.0</code>. The surface is
+the resolution core &mdash; <code>ModuleGraph</code> with stable
 <code>ModuleId</code>s, <code>define</code>/<code>import</code>/<code>resolve</code>,
 visibility, and import-cycle detection, wiring <code>symbol-lang</code> for the name
 key and <code>source-lang</code> for the file each module came from. Every invariant
 is property-tested against a naive reference resolver and verified on Linux, macOS,
-and Windows. The public API is not yet frozen — it stabilises at <code>1.0.0</code>;
-until then a minor release may make a breaking change, each documented in the
-<a href="./CHANGELOG.md"><code>CHANGELOG</code></a>.
+and Windows. See the
+<a href="./docs/API.md#semver-promise"><code>SemVer promise</code></a>.
 
 <hr>
 <br>

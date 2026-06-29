@@ -157,6 +157,10 @@ impl fmt::Display for ResolveError {
 impl core::error::Error for ResolveError {}
 
 #[cfg(test)]
+#[allow(
+    clippy::expect_used,
+    reason = "unwrapping a known-good setup is fine in tests"
+)]
 mod tests {
     extern crate alloc;
     use alloc::string::ToString;

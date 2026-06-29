@@ -503,6 +503,10 @@ impl<T> ModuleGraph<T> {
 }
 
 #[cfg(test)]
+#[allow(
+    clippy::expect_used,
+    reason = "unwrapping a known-good setup is fine in tests"
+)]
 mod tests {
     use intern_lang::Interner;
     use source_lang::SourceMap;

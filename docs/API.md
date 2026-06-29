@@ -1,15 +1,14 @@
 # module-lang &mdash; API Reference
 
 > Complete reference for every public item in `module-lang`, with examples.
-> **Status: pre-1.0.** The surface below is the v0.2.0 resolution core. It is not
-> yet frozen — until `1.0` a minor release may make a breaking change, each
-> documented in [`../CHANGELOG.md`](../CHANGELOG.md). See
-> [`../dev/ROADMAP.md`](../dev/ROADMAP.md).
+> **Status: stable (1.0).** The surface below is the `1.0` contract; it follows
+> [Semantic Versioning](#semver-promise) and will not change in a breaking way
+> before `2.0`. See [`../dev/ROADMAP.md`](../dev/ROADMAP.md).
 
 ## Table of Contents
 
 - [Overview](#overview)
-- [Stability & SemVer](#stability--semver)
+- [SemVer promise](#semver-promise)
 - [Installation](#installation)
 - [Quick start](#quick-start)
 - [The model](#the-model)
@@ -46,14 +45,23 @@ checking, no code generation.
 
 ---
 
-## Stability & SemVer
+## SemVer promise
 
-The crate follows [Semantic Versioning](https://semver.org). During the 0.x series
-the public surface is still being designed, so a minor release may make a breaking
-change — each is documented in [`../CHANGELOG.md`](../CHANGELOG.md) with a migration
-note. At `1.0.0` the surface freezes: no breaking change before `2.0`, additions
-arrive in minor releases, and the MSRV (Rust 1.85) only rises in a minor release.
-This file is updated in lockstep with every release so it always matches the code.
+As of `1.0.0` the public API documented here is **stable**. The crate follows
+[Semantic Versioning](https://semver.org):
+
+- No item in this reference will be **removed or changed in a breaking way** within
+  the `1.x` series. Breaking changes wait for `2.0`.
+- New functionality arrives in **minor** releases (`1.1`, `1.2`, …) and is additive.
+  [`ResolveError`](#resolveerror) is `#[non_exhaustive]`, so a new error variant is a
+  minor change, not a breaking one — match it with a wildcard arm. Renamed (`as`)
+  imports and nested module paths, if they land, arrive the same way.
+- Bug fixes, documentation, and internal optimisation are **patch** releases.
+- The **MSRV** is Rust `1.85`. Raising it is treated as a minor change and called
+  out in the changelog; it is never a patch.
+
+Anything not in this reference — internal modules, field layouts, exact `Debug`
+output — is not part of the contract and may change at any time.
 
 ---
 
@@ -61,7 +69,7 @@ This file is updated in lockstep with every release so it always matches the cod
 
 ```toml
 [dependencies]
-module-lang = "0.2"
+module-lang = "1.0"
 ```
 
 The examples below also use `intern-lang` (to mint names) and `source-lang` (to
