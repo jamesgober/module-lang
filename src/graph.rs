@@ -1,7 +1,7 @@
 //! The module graph and name resolution.
 
-use alloc::collections::BTreeMap;
 use alloc::collections::btree_map::Entry as MapEntry;
+use alloc::collections::{BTreeMap, BTreeSet};
 use alloc::vec::Vec;
 
 use source_lang::SourceId;
@@ -356,8 +356,8 @@ impl<T> ModuleGraph<T> {
             Some(Entry::Define { value, .. }) => return Ok(value),
             Some(Entry::Import { from }) => *from,
         };
-        let mut visited = Vec::new();
-        visited.push((module.to_u32(), name.as_u32()));
+        let mut visited = BTreeSet::new();
+        visited.insert(module.to_u32());
         self.resolve_export(from, name, &mut visited)
     }
 
@@ -458,8 +458,11 @@ impl<T> ModuleGraph<T> {
     /// Resolves `name` as a public export of `start`, following any chain of
     /// re-imports to the definition it names.
     ///
-    /// `visited` carries the `(module, name)` pairs already seen so a chain that
-    /// loops back is reported as a cycle rather than recursing without end. The
+    /// `visited` carries the modules already seen so a chain that loops back is
+    /// reported as a cycle rather than recursing without end. The name is the
+    /// same at every hop, so a repeated module is exactly a repeated
+    /// `(module, name)` pair. A set keeps each check logarithmic, so one resolve
+    /// costs `O(L log L)` for a chain of length `L`. The
     /// walk is iterative and copies module ids out of the graph (phase one) so the
     /// terminal definition can be borrowed in a single step (phase two) without
     /// returning a borrow across the loop.
@@ -467,15 +470,13 @@ impl<T> ModuleGraph<T> {
         &self,
         start: ModuleId,
         name: Symbol,
-        visited: &mut Vec<(u32, u32)>,
+        visited: &mut BTreeSet<u32>,
     ) -> Result<&T, ResolveError> {
         let mut module = start;
         let terminal = loop {
-            let key = (module.to_u32(), name.as_u32());
-            if visited.contains(&key) {
+            if !visited.insert(module.to_u32()) {
                 return Err(ResolveError::ImportCycle { module, name });
             }
-            visited.push(key);
             match self.module(module)?.entries.get(&name) {
                 None => return Err(ResolveError::Unresolved { module, name }),
                 Some(Entry::Define {
