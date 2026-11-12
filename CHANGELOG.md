@@ -21,6 +21,22 @@
 
 ---
 
+## [1.0.1] - 2026-11-12
+
+A patch release. The public API is unchanged.
+
+### Fixed
+
+- **Long import chains resolve in near-linear time.** The cycle check kept the
+  modules seen so far in a list and scanned it on every hop, so one resolve
+  through a chain of `L` re-exports cost `O(L^2)`, and resolving every module in
+  the chain cost `O(L^3)`. The resolver now keeps them in a set, so one resolve
+  costs `O(L log L)`. A chain of 32,000 modules that took about 3 s to resolve
+  in a debug build now takes a few milliseconds. Cycles are still reported at
+  the same module as before.
+
+---
+
 ## [1.0.0] - 2026-06-29
 
 API freeze. The resolution surface introduced in v0.2.0 is ratified as the `1.0`
@@ -85,7 +101,8 @@ Initial scaffold and repository bootstrap. No domain logic yet &mdash; this rele
 - `.github/workflows/ci.yml` CI matrix; `deny.toml`, `clippy.toml`, `rustfmt.toml`.
 - `dev/DIRECTIVES.md` and `dev/ROADMAP.md` (committed engineering standards + plan).
 
-[Unreleased]: https://github.com/jamesgober/module-lang/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/jamesgober/module-lang/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/jamesgober/module-lang/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/jamesgober/module-lang/compare/v0.2.0...v1.0.0
 [0.2.0]: https://github.com/jamesgober/module-lang/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/jamesgober/module-lang/releases/tag/v0.1.0

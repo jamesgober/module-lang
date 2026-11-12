@@ -123,9 +123,9 @@ A module's own names are fully visible from within it, public or private. Crossi
 a module boundary through an import is where [`Visibility`](#visibility) applies: an
 import reaches a name in another module only if it is `Public`. Imports chain (a
 module may re-export what it imported); the resolver walks the chain iteratively and
-records the `(module, name)` pairs it has seen, so a loop is a
+records the modules it has seen in a set, so a loop is a
 [`ResolveError::ImportCycle`](#resolveerror) in bounded time, never unbounded
-recursion.
+recursion. One resolve through a chain of length `L` costs `O(L log L)`.
 
 ---
 
